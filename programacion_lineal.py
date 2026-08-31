@@ -1,7 +1,7 @@
 """Calculadora de programación lineal desarrollada de forma incremental.
 
-Versión v0.4: conserva el método gráfico completo y construye la tabla inicial
-de Simplex para problemas de maximización. El pivoteo se incorporará después.
+Versión v0.4: conserva el método gráfico completo y ejecuta una iteración del
+método Simplex de maximización. El ciclo completo se incorporará después.
 """
 
 import math
@@ -196,6 +196,8 @@ class MetodoGrafico:
 class MetodoSimplex:
     """Construye las tablas del método Simplex de maximización."""
 
+    TOLERANCIA = 1e-9
+
     def crear_tabla_inicial(self, problema):
         """Agrega holguras y crea la tabla correspondiente al modelo."""
         if problema.objetivo != "Maximizar":
@@ -232,6 +234,96 @@ class MetodoSimplex:
             "columnas": columnas,
             "variables_basicas": variables_basicas,
             "tabla": tabla,
+        }
+
+    def realizar_iteracion(self, estado_tabla):
+        """Ejecuta una iteración y conserva los datos que explican el pivoteo."""
+        columna_pivote = self.seleccionar_columna_pivote(estado_tabla)
+        fila_pivote, razones = self.seleccionar_fila_pivote(
+            estado_tabla, columna_pivote
+        )
+
+        variable_entrante = estado_tabla["columnas"][columna_pivote]
+        variable_saliente = estado_tabla["variables_basicas"][fila_pivote]
+        pivote = estado_tabla["tabla"][fila_pivote][columna_pivote]
+        nuevo_estado = self.pivotear(estado_tabla, fila_pivote, columna_pivote)
+        nuevo_estado.update(
+            {
+                "variable_entrante": variable_entrante,
+                "variable_saliente": variable_saliente,
+                "pivote": pivote,
+                "fila_pivote": fila_pivote,
+                "columna_pivote": columna_pivote,
+                "razones": razones,
+            }
+        )
+        return nuevo_estado
+
+    def seleccionar_columna_pivote(self, estado_tabla):
+        """Elige el coeficiente más negativo de la fila Z."""
+        fila_z = estado_tabla["tabla"][-1]
+        coeficientes = fila_z[:-1]
+        valor_menor = min(coeficientes)
+
+        if valor_menor >= -self.TOLERANCIA:
+            raise ValueError("La tabla ya cumple la condición de optimalidad.")
+        return coeficientes.index(valor_menor)
+
+    def seleccionar_fila_pivote(self, estado_tabla, columna_pivote):
+        """Calcula CR/coeficiente y elige la menor razón no negativa."""
+        razones = []
+        for fila in estado_tabla["tabla"][:-1]:
+            coeficiente = fila[columna_pivote]
+            if coeficiente > self.TOLERANCIA:
+                razon = fila[-1] / coeficiente
+                razones.append(0.0 if abs(razon) <= self.TOLERANCIA else razon)
+            else:
+                razones.append(None)
+
+        razones_validas = [
+            (indice, razon)
+            for indice, razon in enumerate(razones)
+            if razon is not None and razon >= -self.TOLERANCIA
+        ]
+        if not razones_validas:
+            raise ValueError("No existe una razón válida para seleccionar la fila pivote.")
+
+        fila_pivote, _razon = min(razones_validas, key=lambda dato: dato[1])
+        return fila_pivote, razones
+
+    def pivotear(self, estado_tabla, fila_pivote, columna_pivote):
+        """Convierte el pivote en uno y hace ceros en el resto de su columna."""
+        tabla_original = estado_tabla["tabla"]
+        pivote = tabla_original[fila_pivote][columna_pivote]
+        if abs(pivote) <= self.TOLERANCIA:
+            raise ValueError("El elemento pivote no puede ser cero.")
+
+        fila_normalizada = [valor / pivote for valor in tabla_original[fila_pivote]]
+        nueva_tabla = []
+
+        for indice, fila in enumerate(tabla_original):
+            if indice == fila_pivote:
+                nueva_fila = fila_normalizada.copy()
+            else:
+                factor = fila[columna_pivote]
+                nueva_fila = [
+                    valor - factor * valor_pivote
+                    for valor, valor_pivote in zip(fila, fila_normalizada)
+                ]
+
+            nueva_tabla.append(
+                [
+                    0.0 if abs(valor) <= self.TOLERANCIA else valor
+                    for valor in nueva_fila
+                ]
+            )
+
+        variables_basicas = estado_tabla["variables_basicas"].copy()
+        variables_basicas[fila_pivote] = estado_tabla["columnas"][columna_pivote]
+        return {
+            "columnas": estado_tabla["columnas"].copy(),
+            "variables_basicas": variables_basicas,
+            "tabla": nueva_tabla,
         }
 
 
@@ -414,11 +506,27 @@ class AplicacionPL:
         self.texto_resultados = tk.Text(
             resultados,
             height=12,
-            wrap="word",
+            wrap="none",
             state="disabled",
             font=("Consolas", 10),
         )
         self.texto_resultados.grid(row=0, column=0, sticky="nsew")
+        desplazamiento_vertical = ttk.Scrollbar(
+            resultados,
+            orient="vertical",
+            command=self.texto_resultados.yview,
+        )
+        desplazamiento_vertical.grid(row=0, column=1, sticky="ns")
+        desplazamiento_horizontal = ttk.Scrollbar(
+            resultados,
+            orient="horizontal",
+            command=self.texto_resultados.xview,
+        )
+        desplazamiento_horizontal.grid(row=1, column=0, sticky="ew")
+        self.texto_resultados.configure(
+            yscrollcommand=desplazamiento_vertical.set,
+            xscrollcommand=desplazamiento_horizontal.set,
+        )
 
         self.marco_grafica = ttk.LabelFrame(panel, text="Gráfica", padding=10)
         self.marco_grafica.grid(row=1, column=0, sticky="nsew")
@@ -606,7 +714,7 @@ class AplicacionPL:
         else:
             self._limpiar_grafica("Simplex no utiliza representación gráfica.")
             try:
-                self.resultado_actual = self.metodo_simplex.crear_tabla_inicial(
+                tabla_inicial = self.metodo_simplex.crear_tabla_inicial(
                     self.problema_actual
                 )
             except ValueError as error:
@@ -618,13 +726,50 @@ class AplicacionPL:
                 self.estado_var.set("No fue posible construir la tabla Simplex.")
                 return
 
+            try:
+                iteracion_1 = self.metodo_simplex.realizar_iteracion(tabla_inicial)
+            except ValueError as error:
+                self.resultado_actual = {
+                    "tabla_inicial": tabla_inicial,
+                    "iteracion_1": None,
+                }
+                self._mostrar_resultado(
+                    "Método seleccionado: Método Simplex\n\n"
+                    "Modelo ingresado\n"
+                    "----------------\n"
+                    f"{self.problema_actual.formatear_modelo()}\n\n"
+                    "Tabla inicial\n"
+                    "-------------\n"
+                    f"{self._formatear_tabla_simplex(tabla_inicial)}\n\n{error}"
+                )
+                self.estado_var.set("No fue posible realizar la primera iteración.")
+                return
+
+            self.resultado_actual = {
+                "tabla_inicial": tabla_inicial,
+                "iteracion_1": iteracion_1,
+            }
             texto = self._formatear_resultado_simplex()
-            self.estado_var.set("Tabla inicial de Simplex construida correctamente.")
+            self.estado_var.set("Primera iteración de Simplex realizada correctamente.")
 
         self._mostrar_resultado(texto)
 
     def _formatear_resultado_simplex(self):
-        """Prepara el modelo y la tabla inicial para el panel de resultados."""
+        """Prepara la tabla inicial y la primera iteración para la interfaz."""
+        tabla_inicial = self.resultado_actual["tabla_inicial"]
+        iteracion = self.resultado_actual["iteracion_1"]
+        lineas_razones = []
+        for variable, razon in zip(
+            tabla_inicial["variables_basicas"][:-1], iteracion["razones"]
+        ):
+            texto_razon = (
+                "no válida"
+                if razon is None
+                else ProblemaPL.formatear_numero(razon)
+            )
+            lineas_razones.append(f"{variable}: {texto_razon}")
+
+        pivote = ProblemaPL.formatear_numero(iteracion["pivote"])
         return (
             "Método seleccionado: Método Simplex\n\n"
             "Modelo ingresado\n"
@@ -632,8 +777,17 @@ class AplicacionPL:
             f"{self.problema_actual.formatear_modelo()}\n\n"
             "Tabla inicial\n"
             "-------------\n"
-            f"{self._formatear_tabla_simplex(self.resultado_actual)}\n\n"
-            "Las iteraciones y el pivoteo se incorporarán en el siguiente incremento."
+            f"{self._formatear_tabla_simplex(tabla_inicial)}\n\n"
+            "Selección del pivote\n"
+            "--------------------\n"
+            f"Variable entrante: {iteracion['variable_entrante']}\n"
+            f"Razones:\n{chr(10).join(lineas_razones)}\n"
+            f"Variable saliente: {iteracion['variable_saliente']}\n"
+            f"Elemento pivote: {pivote}\n\n"
+            "Iteración 1\n"
+            "-----------\n"
+            f"{self._formatear_tabla_simplex(iteracion)}\n\n"
+            "El ciclo completo se incorporará en el siguiente incremento."
         )
 
     @staticmethod

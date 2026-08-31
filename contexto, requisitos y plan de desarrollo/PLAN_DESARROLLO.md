@@ -400,15 +400,15 @@ Implementar una sola iteración correctamente.
 
 ### Implementar
 
-1. Seleccionar variable entrante.
-2. Identificar columna pivote.
-3. Calcular razones válidas:
+1. [x] Seleccionar variable entrante.
+2. [x] Identificar columna pivote.
+3. [x] Calcular razones válidas:
    `CR / coeficiente positivo de columna pivote`.
-4. Elegir la menor razón positiva.
-5. Identificar variable saliente.
-6. Obtener pivote.
-7. Dividir fila pivote por el pivote.
-8. Hacer ceros en el resto de la columna.
+4. [x] Elegir la menor razón positiva.
+5. [x] Identificar variable saliente.
+6. [x] Obtener pivote.
+7. [x] Dividir fila pivote por el pivote.
+8. [x] Hacer ceros en el resto de la columna.
 
 ### Mostrar
 
@@ -422,7 +422,7 @@ Después mostrar la nueva tabla.
 
 ### Regla
 
-No implementar todavía un ciclo completo si una sola iteración no está comprobada.
+- [x] No implementar todavía un ciclo completo si una sola iteración no está comprobada.
 
 ### Commit sugerido
 
@@ -745,7 +745,7 @@ Objetivo del día:
 - [x] Restricciones `<=`.
 - [x] Holguras.
 - [x] Tabla inicial.
-- [ ] Pivoteo.
+- [x] Pivoteo.
 - [ ] Iteraciones.
 - [ ] Resultado.
 

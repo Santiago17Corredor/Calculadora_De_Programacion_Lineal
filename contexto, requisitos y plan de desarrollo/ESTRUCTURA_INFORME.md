@@ -164,11 +164,20 @@ Primer incremento de v0.4 implementado:
 - construcción de la fila `Z - c1X1 - c2X2 = 0`;
 - presentación alineada de la tabla dentro de la interfaz.
 
+Segunda subfase de v0.4 implementada y comprobada:
+
+- selección de la variable entrante mediante el coeficiente más negativo de la
+  fila `Z`;
+- cálculo de razones válidas `CR / coeficiente positivo`;
+- selección de la variable saliente mediante la menor razón;
+- normalización de la fila pivote;
+- eliminación de los demás valores de la columna pivote;
+- presentación de variables, razones, elemento pivote y primera tabla resultante.
+
 Pendiente para completar v0.4:
 
-- selección de pivotes;
-- operaciones por filas;
-- almacenamiento de iteraciones;
+- repetición automática del procedimiento;
+- almacenamiento de todas las iteraciones;
 - lectura de la solución.
 
 ---
