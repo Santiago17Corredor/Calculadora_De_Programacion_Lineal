@@ -1,7 +1,7 @@
 """Calculadora de programación lineal desarrollada de forma incremental.
 
-Versión v0.3: resuelve el método gráfico mediante vértices, todavía sin dibujar
-la gráfica. El método Simplex se incorporará en una fase posterior.
+Versión v0.4: conserva el método gráfico completo y construye la tabla inicial
+de Simplex para problemas de maximización. El pivoteo se incorporará después.
 """
 
 import math
@@ -193,6 +193,48 @@ class MetodoGrafico:
         return max(limite_x * 1.15, 1.0), max(limite_y * 1.15, 1.0)
 
 
+class MetodoSimplex:
+    """Construye las tablas del método Simplex de maximización."""
+
+    def crear_tabla_inicial(self, problema):
+        """Agrega holguras y crea la tabla correspondiente al modelo."""
+        if problema.objetivo != "Maximizar":
+            raise ValueError("Simplex v1.0 solo admite problemas de maximización.")
+        if not problema.restricciones:
+            raise ValueError("Simplex requiere al menos una restricción.")
+
+        cantidad_restricciones = len(problema.restricciones)
+        nombres_holguras = [
+            f"S{indice}" for indice in range(1, cantidad_restricciones + 1)
+        ]
+        columnas = ["X1", "X2", *nombres_holguras, "CR"]
+        variables_basicas = []
+        tabla = []
+
+        for indice, restriccion in enumerate(problema.restricciones):
+            a1, a2, operador, termino_independiente = restriccion
+            if operador != "<=":
+                raise ValueError("Simplex v1.0 solo admite restricciones <=.")
+            if termino_independiente < 0:
+                raise ValueError("Simplex v1.0 requiere términos independientes b >= 0.")
+
+            holguras = [0.0] * cantidad_restricciones
+            holguras[indice] = 1.0
+            tabla.append([a1, a2, *holguras, termino_independiente])
+            variables_basicas.append(nombres_holguras[indice])
+
+        c1, c2 = problema.coeficientes_objetivo
+        fila_z = [-c1, -c2, *([0.0] * cantidad_restricciones), 0.0]
+        tabla.append(fila_z)
+        variables_basicas.append("Z")
+
+        return {
+            "columnas": columnas,
+            "variables_basicas": variables_basicas,
+            "tabla": tabla,
+        }
+
+
 class AplicacionPL:
     """Construye y controla la interfaz gráfica principal."""
 
@@ -203,6 +245,7 @@ class AplicacionPL:
         self.ventana = ventana
         self.filas_restricciones = []
         self.metodo_grafico = MetodoGrafico()
+        self.metodo_simplex = MetodoSimplex()
         self.problema_actual = None
         self.resultado_actual = None
 
@@ -453,7 +496,7 @@ class AplicacionPL:
             self.objetivo_var.set("Maximizar")
             self.objetivo_combo.configure(state="disabled")
             self.estado_var.set("Simplex v1.0 admite solamente maximización y restricciones <=.")
-            self._limpiar_grafica("Simplex mostrará tablas en esta zona a partir de v0.4.")
+            self._limpiar_grafica("Simplex no utiliza representación gráfica.")
         else:
             self.objetivo_combo.configure(state="readonly")
             self.estado_var.set("El método gráfico admite maximización y minimización.")
@@ -561,19 +604,67 @@ class AplicacionPL:
             self._mostrar_grafica()
             self.estado_var.set("Método gráfico resuelto mediante vértices.")
         else:
-            self.resultado_actual = None
-            self._limpiar_grafica("Simplex mostrará tablas en esta zona a partir de v0.4.")
-            texto = (
-                f"Método seleccionado: {metodo}\n\n"
-                "Modelo ingresado\n"
-                "----------------\n"
-                f"{self.problema_actual.formatear_modelo()}\n\n"
-                "El modelo fue leído correctamente. Simplex se implementará "
-                "en la versión v0.4."
-            )
-            self.estado_var.set("Modelo Simplex leído; el algoritmo aún no está implementado.")
+            self._limpiar_grafica("Simplex no utiliza representación gráfica.")
+            try:
+                self.resultado_actual = self.metodo_simplex.crear_tabla_inicial(
+                    self.problema_actual
+                )
+            except ValueError as error:
+                self.resultado_actual = None
+                self._mostrar_resultado(
+                    f"Modelo ingresado\n----------------\n"
+                    f"{self.problema_actual.formatear_modelo()}\n\n{error}"
+                )
+                self.estado_var.set("No fue posible construir la tabla Simplex.")
+                return
+
+            texto = self._formatear_resultado_simplex()
+            self.estado_var.set("Tabla inicial de Simplex construida correctamente.")
 
         self._mostrar_resultado(texto)
+
+    def _formatear_resultado_simplex(self):
+        """Prepara el modelo y la tabla inicial para el panel de resultados."""
+        return (
+            "Método seleccionado: Método Simplex\n\n"
+            "Modelo ingresado\n"
+            "----------------\n"
+            f"{self.problema_actual.formatear_modelo()}\n\n"
+            "Tabla inicial\n"
+            "-------------\n"
+            f"{self._formatear_tabla_simplex(self.resultado_actual)}\n\n"
+            "Las iteraciones y el pivoteo se incorporarán en el siguiente incremento."
+        )
+
+    @staticmethod
+    def _formatear_tabla_simplex(resultado):
+        """Convierte una tabla numérica en columnas alineadas."""
+        encabezados = ["VB", *resultado["columnas"]]
+        filas = []
+
+        for variable_basica, valores in zip(
+            resultado["variables_basicas"], resultado["tabla"]
+        ):
+            fila = [
+                variable_basica,
+                *(ProblemaPL.formatear_numero(valor) for valor in valores),
+            ]
+            filas.append(fila)
+
+        anchos = []
+        for indice, encabezado in enumerate(encabezados):
+            ancho = max(len(encabezado), *(len(fila[indice]) for fila in filas))
+            anchos.append(ancho)
+
+        def formatear_fila(fila):
+            return " | ".join(
+                valor.rjust(anchos[indice]) for indice, valor in enumerate(fila)
+            )
+
+        separador = "-+-".join("-" * ancho for ancho in anchos)
+        lineas = [formatear_fila(encabezados), separador]
+        lineas.extend(formatear_fila(fila) for fila in filas)
+        return "\n".join(lineas)
 
     def _mostrar_grafica(self):
         """Dibuja e integra la gráfica estática del resultado actual."""

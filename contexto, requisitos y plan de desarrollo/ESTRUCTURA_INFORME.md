@@ -154,13 +154,22 @@ Representación visual implementada en el cierre de v0.3:
 
 ### 3.6 Simplex implementado
 
-Completar cuando termine v0.4:
+Primer incremento de v0.4 implementado:
 
-- construccion de la tabla;
-- seleccion de pivotes;
+- validación de maximización, restricciones `<=` y términos independientes no
+  negativos;
+- creación de una variable de holgura por restricción;
+- construcción de columnas `X1`, `X2`, `S1...Sm` y `CR`;
+- registro de las variables básicas iniciales;
+- construcción de la fila `Z - c1X1 - c2X2 = 0`;
+- presentación alineada de la tabla dentro de la interfaz.
+
+Pendiente para completar v0.4:
+
+- selección de pivotes;
 - operaciones por filas;
 - almacenamiento de iteraciones;
-- lectura de la solucion.
+- lectura de la solución.
 
 ---
 

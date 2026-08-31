@@ -363,14 +363,14 @@ X1, X2 >= 0
 
 ### Implementar
 
-1. Detectar cantidad de restricciones.
-2. Crear una variable de holgura por restricción:
+1. [x] Detectar cantidad de restricciones.
+2. [x] Crear una variable de holgura por restricción:
    `S1`, `S2`, ..., `Sm`.
-3. Construir matriz de la tabla.
-4. Agregar columna `CR`.
-5. Construir fila:
+3. [x] Construir matriz de la tabla.
+4. [x] Agregar columna `CR`.
+5. [x] Construir fila:
    `Z - c1X1 - c2X2 = 0`.
-6. Guardar nombres de variables básicas.
+6. [x] Guardar nombres de variables básicas.
 
 ### Tabla conceptual
 
@@ -383,7 +383,7 @@ Z  | -c1| -c2| 0  | 0  | ... | 0
 
 ### Prueba
 
-Comparar la tabla inicial del programa con una tabla elaborada manualmente.
+- [x] Comparar la tabla inicial del programa con una tabla elaborada manualmente.
 
 ### Commit sugerido
 
@@ -739,12 +739,12 @@ Objetivo del día:
 
 ## Simplex
 
-- [ ] Maximización.
-- [ ] Dos variables.
-- [ ] Cantidad variable de restricciones.
-- [ ] Restricciones `<=`.
-- [ ] Holguras.
-- [ ] Tabla inicial.
+- [x] Maximización.
+- [x] Dos variables.
+- [x] Cantidad variable de restricciones.
+- [x] Restricciones `<=`.
+- [x] Holguras.
+- [x] Tabla inicial.
 - [ ] Pivoteo.
 - [ ] Iteraciones.
 - [ ] Resultado.
