@@ -11,7 +11,11 @@ La primera entrega contempla:
 - visualización del procedimiento y los resultados.
 
 El proyecto se desarrolla de forma incremental. La versión actual es `v0.2`,
-correspondiente a la interfaz gráfica básica.
+correspondiente a la interfaz gráfica básica y la captura del modelo matemático.
+
+En esta versión, el botón `Resolver` valida las entradas y muestra el modelo
+interpretado por la aplicación. Los algoritmos de solución todavía no están
+implementados.
 
 ## Ejecución
 

@@ -207,11 +207,11 @@ Convertir los datos escritos en la GUI en una representación interna sencilla.
 
 ### Implementar
 
-- clase o estructura `ProblemaPL`;
-- función para leer coeficientes;
-- almacenamiento de restricciones;
-- selección del objetivo;
-- impresión temporal del modelo en la zona de resultados.
+- [x] clase o estructura `ProblemaPL`;
+- [x] función para leer coeficientes;
+- [x] almacenamiento de restricciones;
+- [x] selección del objetivo;
+- [x] impresión temporal del modelo en la zona de resultados.
 
 ### Ejemplo de resultado temporal
 
@@ -230,7 +230,7 @@ Antes de resolver cualquier algoritmo se debe comprobar que la aplicación entie
 
 ### Prueba
 
-Ingresar varios modelos y verificar que el texto mostrado coincida exactamente con los datos.
+- [x] Ingresar varios modelos y verificar que el texto mostrado coincida exactamente con los datos.
 
 ### Commit sugerido
 
@@ -751,13 +751,13 @@ Objetivo del día:
 
 ## Interfaz
 
-- [ ] Selector método.
-- [ ] Selector objetivo.
-- [ ] Agregar restricción.
-- [ ] Eliminar restricción.
-- [ ] Resolver.
-- [ ] Limpiar.
-- [ ] Resultados visibles.
+- [x] Selector método.
+- [x] Selector objetivo.
+- [x] Agregar restricción.
+- [x] Eliminar restricción.
+- [x] Resolver.
+- [x] Limpiar.
+- [x] Resultados visibles.
 
 ## Informe
 
