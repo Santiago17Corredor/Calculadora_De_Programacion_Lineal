@@ -1,15 +1,14 @@
 # ESTRUCTURA INICIAL DEL INFORME
 ## Working Paper - Calculadora de Programacion Lineal
 
-**Estado:** esquema de v0.1
+**Estado:** contenido redactado y diagramado en v0.5
 
 **Autor:** Santiago Andres Walteros Corredor
 
 **Formato final previsto:** Word y PDF con plantilla Working Paper de IEEE
 
-Este archivo organiza el contenido que se redactara durante el desarrollo. No es
-todavia el informe final y no debe contener resultados que aun no se hayan
-obtenido.
+Este archivo organiza el contenido redactado durante el desarrollo. El Word y el
+PDF diagramados se encuentran en la carpeta `output` del proyecto.
 
 ---
 
@@ -259,11 +258,11 @@ Agregar unicamente fuentes consultadas y citadas en el texto. Priorizar:
 
 - [x] Estructura inicial definida.
 - [ ] Datos institucionales completos.
-- [ ] Introduccion redactada.
-- [ ] Referente teorico redactado y citado.
-- [ ] Procedimiento actualizado con la implementacion real.
-- [ ] Resultados y capturas incorporados.
-- [ ] Conclusiones redactadas.
-- [ ] Bibliografia revisada.
-- [ ] Documento adaptado a Word con plantilla IEEE.
-- [ ] PDF final revisado visualmente.
+- [x] Introduccion redactada.
+- [x] Referente teorico redactado y citado.
+- [x] Procedimiento actualizado con la implementacion real.
+- [x] Resultados y capturas incorporados.
+- [x] Conclusiones redactadas.
+- [x] Bibliografia revisada.
+- [x] Documento adaptado a Word con formato de working paper a dos columnas.
+- [x] PDF final revisado visualmente.

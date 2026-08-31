@@ -640,6 +640,19 @@ Centrarse en:
 - implementación incremental;
 - resultados obtenidos.
 
+### Estado de la fase
+
+- [x] Informe redactado con título, autor, resumen, introducción, referente
+  teórico, procedimiento, resultados, limitaciones, conclusiones y referencias.
+- [x] Arquitectura, flujo, interfaz, gráfica y tablas Simplex incorporados como
+  evidencia visual.
+- [x] Documento Word diagramado en formato de working paper a dos columnas.
+- [x] PDF de tres páginas generado y revisado visualmente página por página.
+- [x] Documento auditado sin problemas de accesibilidad, imágenes flotantes ni
+  geometría inconsistente en las tablas.
+- [ ] Confirmar institución, programa académico, docente y correo institucional,
+  si la plantilla de entrega exige esos datos.
+
 ---
 
 # 14. Cronograma de esta semana

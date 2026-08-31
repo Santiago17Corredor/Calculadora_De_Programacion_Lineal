@@ -53,4 +53,9 @@ python programacion_lineal.py
 - [Estructura del informe](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/ESTRUCTURA_INFORME.md)
 - [Pruebas manuales](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/PRUEBAS_MANUALES.md)
 
+## Informe de la primera entrega
+
+- [Documento en Word](output/document/Informe_Calculadora_Programacion_Lineal.docx)
+- [Documento en PDF](output/pdf/Informe_Calculadora_Programacion_Lineal.pdf)
+
 **Autor:** Santiago Andrés Walteros Corredor
