@@ -439,11 +439,11 @@ Repetir automáticamente las iteraciones hasta la tabla óptima.
 
 ### Implementar
 
-- ciclo de iteraciones;
-- almacenamiento de cada tabla;
-- actualización de variables básicas;
-- condición de finalización;
-- lectura de solución.
+- [x] ciclo de iteraciones;
+- [x] almacenamiento de cada tabla;
+- [x] actualización de variables básicas;
+- [x] condición de finalización;
+- [x] lectura de solución.
 
 ### Convención de finalización
 
@@ -455,10 +455,10 @@ el proceso de maximización continúa mientras existan coeficientes negativos re
 
 ### Mostrar al usuario
 
-- tabla inicial;
-- datos del pivote;
-- tabla de cada iteración;
-- solución final.
+- [x] tabla inicial;
+- [x] datos del pivote;
+- [x] tabla de cada iteración;
+- [x] solución final.
 
 ### Prueba mínima
 
@@ -484,6 +484,8 @@ Z = 2900
 ```
 
 Este modelo corresponde al modelo transformado que aparece en uno de los ejercicios del taller y sirve para comprobar la mecánica de las tablas.
+
+- [x] Resultado comprobado en el programa: `X1 = 30`, `X2 = 40`, `Z = 2900`.
 
 ### Commit sugerido
 
@@ -746,8 +748,8 @@ Objetivo del día:
 - [x] Holguras.
 - [x] Tabla inicial.
 - [x] Pivoteo.
-- [ ] Iteraciones.
-- [ ] Resultado.
+- [x] Iteraciones.
+- [x] Resultado.
 
 ## Interfaz
 

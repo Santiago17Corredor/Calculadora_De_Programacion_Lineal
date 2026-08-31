@@ -23,8 +23,9 @@ class ProblemaPL:
     @staticmethod
     def formatear_numero(valor):
         """Muestra enteros sin decimal y conserva los decimales necesarios."""
-        if float(valor).is_integer():
-            return str(int(valor))
+        numero = float(valor)
+        if math.isclose(numero, round(numero), abs_tol=1e-9):
+            return str(int(round(numero)))
         return f"{valor:.10g}"
 
     @classmethod
@@ -197,6 +198,7 @@ class MetodoSimplex:
     """Construye las tablas del método Simplex de maximización."""
 
     TOLERANCIA = 1e-9
+    MAX_ITERACIONES = 100
 
     def crear_tabla_inicial(self, problema):
         """Agrega holguras y crea la tabla correspondiente al modelo."""
@@ -236,6 +238,57 @@ class MetodoSimplex:
             "tabla": tabla,
         }
 
+    def resolver(self, problema):
+        """Repite el pivoteo hasta obtener la tabla óptima."""
+        tabla_inicial = self.crear_tabla_inicial(problema)
+        estado_actual = tabla_inicial
+        iteraciones = []
+
+        while not self.es_optima(estado_actual):
+            if len(iteraciones) >= self.MAX_ITERACIONES:
+                raise ValueError(
+                    "Se alcanzó el límite preventivo de iteraciones de Simplex."
+                )
+            estado_actual = self.realizar_iteracion(estado_actual)
+            iteraciones.append(estado_actual)
+
+        return {
+            "tabla_inicial": tabla_inicial,
+            "iteraciones": iteraciones,
+            "solucion": self.leer_solucion(estado_actual),
+        }
+
+    def es_optima(self, estado_tabla):
+        """Comprueba que la fila Z ya no contenga coeficientes negativos."""
+        return all(
+            coeficiente >= -self.TOLERANCIA
+            for coeficiente in estado_tabla["tabla"][-1][:-1]
+        )
+
+    def leer_solucion(self, estado_tabla):
+        """Lee X1, X2 y Z desde las variables básicas de la tabla final."""
+        solucion = {"X1": 0.0, "X2": 0.0}
+        for variable, fila in zip(
+            estado_tabla["variables_basicas"][:-1], estado_tabla["tabla"][:-1]
+        ):
+            if variable in solucion:
+                solucion[variable] = fila[-1]
+
+        solucion["Z"] = estado_tabla["tabla"][-1][-1]
+        return {
+            nombre: self._normalizar_valor(valor)
+            for nombre, valor in solucion.items()
+        }
+
+    def _normalizar_valor(self, valor):
+        """Limpia ceros y enteros afectados por redondeo de punto flotante."""
+        if abs(valor) <= self.TOLERANCIA:
+            return 0.0
+        entero_cercano = round(valor)
+        if math.isclose(valor, entero_cercano, abs_tol=self.TOLERANCIA):
+            return float(entero_cercano)
+        return valor
+
     def realizar_iteracion(self, estado_tabla):
         """Ejecuta una iteración y conserva los datos que explican el pivoteo."""
         columna_pivote = self.seleccionar_columna_pivote(estado_tabla)
@@ -255,6 +308,9 @@ class MetodoSimplex:
                 "fila_pivote": fila_pivote,
                 "columna_pivote": columna_pivote,
                 "razones": razones,
+                "variables_basicas_anteriores": estado_tabla[
+                    "variables_basicas"
+                ].copy(),
             }
         )
         return nuevo_estado
@@ -714,7 +770,7 @@ class AplicacionPL:
         else:
             self._limpiar_grafica("Simplex no utiliza representación gráfica.")
             try:
-                tabla_inicial = self.metodo_simplex.crear_tabla_inicial(
+                self.resultado_actual = self.metodo_simplex.resolver(
                     self.problema_actual
                 )
             except ValueError as error:
@@ -723,72 +779,77 @@ class AplicacionPL:
                     f"Modelo ingresado\n----------------\n"
                     f"{self.problema_actual.formatear_modelo()}\n\n{error}"
                 )
-                self.estado_var.set("No fue posible construir la tabla Simplex.")
+                self.estado_var.set("No fue posible resolver el modelo con Simplex.")
                 return
 
-            try:
-                iteracion_1 = self.metodo_simplex.realizar_iteracion(tabla_inicial)
-            except ValueError as error:
-                self.resultado_actual = {
-                    "tabla_inicial": tabla_inicial,
-                    "iteracion_1": None,
-                }
-                self._mostrar_resultado(
-                    "Método seleccionado: Método Simplex\n\n"
-                    "Modelo ingresado\n"
-                    "----------------\n"
-                    f"{self.problema_actual.formatear_modelo()}\n\n"
-                    "Tabla inicial\n"
-                    "-------------\n"
-                    f"{self._formatear_tabla_simplex(tabla_inicial)}\n\n{error}"
-                )
-                self.estado_var.set("No fue posible realizar la primera iteración.")
-                return
-
-            self.resultado_actual = {
-                "tabla_inicial": tabla_inicial,
-                "iteracion_1": iteracion_1,
-            }
             texto = self._formatear_resultado_simplex()
-            self.estado_var.set("Primera iteración de Simplex realizada correctamente.")
+            self.estado_var.set("Simplex completado y solución final obtenida.")
 
         self._mostrar_resultado(texto)
 
     def _formatear_resultado_simplex(self):
-        """Prepara la tabla inicial y la primera iteración para la interfaz."""
+        """Prepara todas las iteraciones y la solución para la interfaz."""
         tabla_inicial = self.resultado_actual["tabla_inicial"]
-        iteracion = self.resultado_actual["iteracion_1"]
-        lineas_razones = []
-        for variable, razon in zip(
-            tabla_inicial["variables_basicas"][:-1], iteracion["razones"]
-        ):
-            texto_razon = (
-                "no válida"
-                if razon is None
-                else ProblemaPL.formatear_numero(razon)
-            )
-            lineas_razones.append(f"{variable}: {texto_razon}")
+        lineas = [
+            "Método seleccionado: Método Simplex",
+            "",
+            "Modelo ingresado",
+            "----------------",
+            self.problema_actual.formatear_modelo(),
+            "",
+            "Tabla inicial",
+            "-------------",
+            self._formatear_tabla_simplex(tabla_inicial),
+        ]
 
-        pivote = ProblemaPL.formatear_numero(iteracion["pivote"])
-        return (
-            "Método seleccionado: Método Simplex\n\n"
-            "Modelo ingresado\n"
-            "----------------\n"
-            f"{self.problema_actual.formatear_modelo()}\n\n"
-            "Tabla inicial\n"
-            "-------------\n"
-            f"{self._formatear_tabla_simplex(tabla_inicial)}\n\n"
-            "Selección del pivote\n"
-            "--------------------\n"
-            f"Variable entrante: {iteracion['variable_entrante']}\n"
-            f"Razones:\n{chr(10).join(lineas_razones)}\n"
-            f"Variable saliente: {iteracion['variable_saliente']}\n"
-            f"Elemento pivote: {pivote}\n\n"
-            "Iteración 1\n"
-            "-----------\n"
-            f"{self._formatear_tabla_simplex(iteracion)}\n\n"
-            "El ciclo completo se incorporará en el siguiente incremento."
+        for numero, iteracion in enumerate(
+            self.resultado_actual["iteraciones"], start=1
+        ):
+            lineas_razones = []
+            for variable, razon in zip(
+                iteracion["variables_basicas_anteriores"][:-1],
+                iteracion["razones"],
+            ):
+                texto_razon = (
+                    "no válida"
+                    if razon is None
+                    else ProblemaPL.formatear_numero(razon)
+                )
+                lineas_razones.append(f"{variable}: {texto_razon}")
+
+            pivote = ProblemaPL.formatear_numero(iteracion["pivote"])
+            lineas.extend(
+                [
+                    "",
+                    f"Iteración {numero} - selección del pivote",
+                    "------------------------------------",
+                    f"Variable entrante: {iteracion['variable_entrante']}",
+                    "Razones:",
+                    *lineas_razones,
+                    f"Variable saliente: {iteracion['variable_saliente']}",
+                    f"Elemento pivote: {pivote}",
+                    "",
+                    f"Tabla de la iteración {numero}",
+                    "------------------------",
+                    self._formatear_tabla_simplex(iteracion),
+                ]
+            )
+
+        if not self.resultado_actual["iteraciones"]:
+            lineas.extend(["", "La tabla inicial ya cumple la condición de optimalidad."])
+
+        solucion = self.resultado_actual["solucion"]
+        lineas.extend(
+            [
+                "",
+                "Solución final",
+                "--------------",
+                f"X1 = {ProblemaPL.formatear_numero(solucion['X1'])}",
+                f"X2 = {ProblemaPL.formatear_numero(solucion['X2'])}",
+                f"Z  = {ProblemaPL.formatear_numero(solucion['Z'])}",
+            ]
         )
+        return "\n".join(lineas)
 
     @staticmethod
     def _formatear_tabla_simplex(resultado):

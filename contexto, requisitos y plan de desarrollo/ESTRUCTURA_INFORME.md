@@ -174,11 +174,17 @@ Segunda subfase de v0.4 implementada y comprobada:
 - eliminación de los demás valores de la columna pivote;
 - presentación de variables, razones, elemento pivote y primera tabla resultante.
 
-Pendiente para completar v0.4:
+Cierre de v0.4 implementado y verificado:
 
-- repetición automática del procedimiento;
-- almacenamiento de todas las iteraciones;
-- lectura de la solución.
+- repetición automática mientras existan coeficientes negativos relevantes en
+  la fila `Z`;
+- almacenamiento de todas las tablas y datos de pivoteo;
+- actualización de las variables básicas en cada iteración;
+- límite preventivo para evitar ciclos indefinidos;
+- lectura de `X1` y `X2` desde las variables básicas de la tabla final;
+- lectura del valor óptimo de `Z` desde `CR`;
+- normalización de errores pequeños de punto flotante;
+- presentación completa del procedimiento y la solución en la interfaz.
 
 ---
 

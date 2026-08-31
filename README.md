@@ -12,13 +12,14 @@ La primera entrega contempla:
 
 El proyecto se desarrolla de forma incremental. La versión actual es `v0.4`,
 con el método gráfico completo y la construcción de la tabla inicial de Simplex
-para problemas de maximización, seguida por una primera iteración verificada.
+para problemas de maximización, seguida por todas las iteraciones necesarias
+hasta obtener la solución óptima.
 
 En esta versión, el botón `Resolver` valida las entradas, muestra el modelo,
 calcula los vértices factibles y selecciona el máximo o mínimo mediante el método
 gráfico. Para Simplex agrega variables de holgura y muestra la tabla inicial; el
-pivoteo selecciona variable entrante y saliente, calcula razones y genera la
-primera tabla resultante. El ciclo completo todavía no está implementado.
+pivoteo selecciona variables entrantes y salientes, calcula razones, conserva
+cada tabla y muestra los valores finales de `X1`, `X2` y `Z`.
 
 La gráfica presenta las restricciones, la región factible, los vértices y la
 solución óptima dentro de la misma ventana.
