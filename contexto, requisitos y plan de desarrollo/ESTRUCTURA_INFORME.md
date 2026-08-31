@@ -190,28 +190,33 @@ Cierre de v0.4 implementado y verificado:
 
 ## 4. Resultados
 
-Esta seccion se completara con evidencia real de v0.5.
+La version v0.5 se verifico con siete ejercicios ejecutados desde la interfaz.
+Todos los resultados coincidieron con la solucion manual dentro de la tolerancia
+numerica definida.
 
 ### 4.1 Pruebas del metodo grafico
 
-Incluir dos ejercicios de maximizacion y dos de minimizacion.
+Se ejecutaron dos ejercicios de maximizacion y dos de minimizacion.
 
 | Caso | Resultado manual | Resultado del programa | Coincide |
 |---|---:|---:|---|
-| Grafico max 1 | Pendiente | Pendiente | Pendiente |
-| Grafico max 2 | Pendiente | Pendiente | Pendiente |
-| Grafico min 1 | Pendiente | Pendiente | Pendiente |
-| Grafico min 2 | Pendiente | Pendiente | Pendiente |
+| G-01, maximizacion | `(30, 40), Z = 2900` | `(30, 40), Z = 2900` | Si |
+| G-02, maximizacion | `(50, 50), Z = 4000` | `(50, 50), Z = 4000` | Si |
+| G-03, minimizacion | `(4, 0), Z = 8` | `(4, 0), Z = 8` | Si |
+| G-04, minimizacion | `(2, 3), Z = 5` | `(2, 3), Z = 5` | Si |
 
 ### 4.2 Pruebas del metodo Simplex
 
-Incluir tres ejercicios compatibles con el alcance de v1.0.
+Se ejecutaron tres ejercicios compatibles con el alcance de v1.0.
 
 | Caso | Resultado manual | Resultado del programa | Coincide |
 |---|---:|---:|---|
-| Simplex max 1 | Pendiente | Pendiente | Pendiente |
-| Simplex max 2 | Pendiente | Pendiente | Pendiente |
-| Simplex max 3 | Pendiente | Pendiente | Pendiente |
+| S-01 | `(30, 40), Z = 2900` | `(30, 40), Z = 2900` | Si |
+| S-02 | `(1, 3), Z = 9` | `(1, 3), Z = 9` | Si |
+| S-03 | `(2, 6), Z = 36` | `(2, 6), Z = 36` | Si |
+
+El detalle de los modelos, las observaciones y el numero de iteraciones se
+conserva en `PRUEBAS_MANUALES.md`.
 
 ### 4.3 Evidencias graficas pendientes
 

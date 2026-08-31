@@ -51,5 +51,6 @@ python programacion_lineal.py
 - [Plan de desarrollo](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/PLAN_DESARROLLO.md)
 - [Diseño del sistema](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/DISENO.md)
 - [Estructura del informe](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/ESTRUCTURA_INFORME.md)
+- [Pruebas manuales](contexto%2C%20requisitos%20y%20plan%20de%20desarrollo/PRUEBAS_MANUALES.md)
 
 **Autor:** Santiago Andrés Walteros Corredor

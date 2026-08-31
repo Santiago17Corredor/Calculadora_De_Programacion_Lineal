@@ -544,16 +544,16 @@ Comprobar con ejercicios conocidos.
 
 ### Método gráfico
 
-Realizar al menos:
+Pruebas realizadas:
 
-- 2 ejercicios de maximización;
-- 2 ejercicios de minimización.
+- [x] 2 ejercicios de maximización.
+- [x] 2 ejercicios de minimización.
 
 ### Simplex
 
-Realizar al menos:
+Pruebas realizadas:
 
-- 3 ejercicios básicos de maximización.
+- [x] 3 ejercicios básicos de maximización.
 
 ### Para cada prueba registrar
 
@@ -565,9 +565,13 @@ Coincide: sí/no
 Observaciones:
 ```
 
+- [x] Los siete casos y sus resultados quedaron registrados en
+  `PRUEBAS_MANUALES.md`.
+
 ### No hacer todavía
 
-No construir una suite compleja de pruebas automatizadas salvo que sobre tiempo.
+- [x] No se construyó una suite compleja de pruebas automatizadas; la validación
+  se mantuvo dentro del alcance manual de v0.5.
 
 ### Commit sugerido
 
