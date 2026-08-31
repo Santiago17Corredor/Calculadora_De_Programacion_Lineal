@@ -307,13 +307,13 @@ Representar visualmente el resultado ya calculado.
 
 ### Implementar
 
-- líneas de restricciones;
-- ejes X1 y X2;
-- límites razonables de gráfica;
-- región factible sombreada;
-- vértices;
-- punto óptimo;
-- leyenda sencilla.
+- [x] líneas de restricciones;
+- [x] ejes X1 y X2;
+- [x] límites razonables de gráfica;
+- [x] región factible sombreada;
+- [x] vértices;
+- [x] punto óptimo;
+- [x] leyenda sencilla.
 
 ### No implementar
 
@@ -324,16 +324,16 @@ Representar visualmente el resultado ya calculado.
 
 ### Integración
 
-La gráfica puede mostrarse embebida en Tkinter mediante Matplotlib.
+- [x] La gráfica se muestra embebida en Tkinter mediante Matplotlib.
 
 ### Prueba
 
 Comparar visualmente:
 
-- rectas;
-- región;
-- vértices;
-- solución.
+- [x] rectas;
+- [x] región;
+- [x] vértices;
+- [x] solución.
 
 ### Commit sugerido
 
@@ -722,7 +722,7 @@ Objetivo del día:
 - [x] Arquitectura terminada.
 - [x] Diagrama de clases terminado.
 - [x] Diagramas de secuencia terminados.
-- [ ] Interfaz coherente con diseño.
+- [x] Interfaz coherente con diseño.
 
 ## Método gráfico
 
@@ -735,7 +735,7 @@ Objetivo del día:
 - [x] Vértices.
 - [x] Evaluación de Z.
 - [x] Óptimo.
-- [ ] Gráfica.
+- [x] Gráfica.
 
 ## Simplex
 

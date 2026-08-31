@@ -11,12 +11,27 @@ La primera entrega contempla:
 - visualización del procedimiento y los resultados.
 
 El proyecto se desarrolla de forma incremental. La versión actual es `v0.3`,
-correspondiente al método gráfico resuelto mediante vértices, todavía sin la
-representación con Matplotlib.
+correspondiente al método gráfico completo con cálculo de vértices y
+representación estática mediante Matplotlib.
 
 En esta versión, el botón `Resolver` valida las entradas, muestra el modelo,
 calcula los vértices factibles y selecciona el máximo o mínimo. El método Simplex
 todavía no está implementado.
+
+La gráfica presenta las restricciones, la región factible, los vértices y la
+solución óptima dentro de la misma ventana.
+
+## Dependencias
+
+- Python 3.
+- Tkinter.
+- Matplotlib.
+
+Matplotlib puede instalarse con:
+
+```text
+python -m pip install matplotlib
+```
 
 ## Ejecución
 

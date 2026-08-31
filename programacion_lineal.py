@@ -8,6 +8,9 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 
 class ProblemaPL:
     """Representa los datos de un problema con dos variables de decisión."""
@@ -159,6 +162,35 @@ class MetodoGrafico:
         """Evalúa la función objetivo en cada vértice factible."""
         c1, c2 = problema.coeficientes_objetivo
         return [(punto, c1 * punto[0] + c2 * punto[1]) for punto in vertices]
+
+    @staticmethod
+    def ordenar_vertices(vertices):
+        """Ordena los vértices alrededor de su centro para formar el polígono."""
+        centro_x = sum(punto[0] for punto in vertices) / len(vertices)
+        centro_y = sum(punto[1] for punto in vertices) / len(vertices)
+        return sorted(
+            vertices,
+            key=lambda punto: math.atan2(punto[1] - centro_y, punto[0] - centro_x),
+        )
+
+    def calcular_limites_grafica(self, problema, vertices):
+        """Obtiene límites positivos que permiten ver rectas y región factible."""
+        valores_x = [punto[0] for punto in vertices if punto[0] >= 0]
+        valores_y = [punto[1] for punto in vertices if punto[1] >= 0]
+
+        for a1, a2, _operador, termino_independiente in problema.restricciones:
+            if abs(a1) > self.TOLERANCIA:
+                corte_x = termino_independiente / a1
+                if corte_x > 0:
+                    valores_x.append(corte_x)
+            if abs(a2) > self.TOLERANCIA:
+                corte_y = termino_independiente / a2
+                if corte_y > 0:
+                    valores_y.append(corte_y)
+
+        limite_x = max(valores_x, default=1.0)
+        limite_y = max(valores_y, default=1.0)
+        return max(limite_x * 1.15, 1.0), max(limite_y * 1.15, 1.0)
 
 
 class AplicacionPL:
@@ -345,15 +377,18 @@ class AplicacionPL:
         )
         self.texto_resultados.grid(row=0, column=0, sticky="nsew")
 
-        grafica = ttk.LabelFrame(panel, text="Gráfica", padding=10)
-        grafica.grid(row=1, column=0, sticky="nsew")
-        grafica.rowconfigure(0, weight=1)
-        grafica.columnconfigure(0, weight=1)
-        ttk.Label(
-            grafica,
-            text="La gráfica se incorporará en v0.3.",
+        self.marco_grafica = ttk.LabelFrame(panel, text="Gráfica", padding=10)
+        self.marco_grafica.grid(row=1, column=0, sticky="nsew")
+        self.marco_grafica.rowconfigure(0, weight=1)
+        self.marco_grafica.columnconfigure(0, weight=1)
+        self.etiqueta_grafica = ttk.Label(
+            self.marco_grafica,
+            text="La gráfica aparecerá al resolver un modelo gráfico.",
             anchor="center",
-        ).grid(row=0, column=0, sticky="nsew")
+        )
+        self.etiqueta_grafica.grid(row=0, column=0, sticky="nsew")
+        self.canvas_grafica = None
+        self.figura_grafica = None
 
     def agregar_restriccion(self):
         """Agrega una fila vacía al formulario de restricciones."""
@@ -418,9 +453,11 @@ class AplicacionPL:
             self.objetivo_var.set("Maximizar")
             self.objetivo_combo.configure(state="disabled")
             self.estado_var.set("Simplex v1.0 admite solamente maximización y restricciones <=.")
+            self._limpiar_grafica("Simplex mostrará tablas en esta zona a partir de v0.4.")
         else:
             self.objetivo_combo.configure(state="readonly")
             self.estado_var.set("El método gráfico admite maximización y minimización.")
+            self._limpiar_grafica()
 
         self._actualizar_operadores()
 
@@ -499,6 +536,7 @@ class AplicacionPL:
         except ValueError as error:
             self.problema_actual = None
             self.resultado_actual = None
+            self._limpiar_grafica()
             self._mostrar_resultado(f"No se pudo construir el modelo.\n\n{error}")
             self.estado_var.set("Revise los datos indicados en el panel de resultados.")
             return
@@ -511,6 +549,7 @@ class AplicacionPL:
                 )
             except ValueError as error:
                 self.resultado_actual = None
+                self._limpiar_grafica()
                 self._mostrar_resultado(
                     f"Modelo ingresado\n----------------\n"
                     f"{self.problema_actual.formatear_modelo()}\n\n{error}"
@@ -519,9 +558,11 @@ class AplicacionPL:
                 return
 
             texto = self._formatear_resultado_grafico()
+            self._mostrar_grafica()
             self.estado_var.set("Método gráfico resuelto mediante vértices.")
         else:
             self.resultado_actual = None
+            self._limpiar_grafica("Simplex mostrará tablas en esta zona a partir de v0.4.")
             texto = (
                 f"Método seleccionado: {metodo}\n\n"
                 "Modelo ingresado\n"
@@ -533,6 +574,125 @@ class AplicacionPL:
             self.estado_var.set("Modelo Simplex leído; el algoritmo aún no está implementado.")
 
         self._mostrar_resultado(texto)
+
+    def _mostrar_grafica(self):
+        """Dibuja e integra la gráfica estática del resultado actual."""
+        self._limpiar_grafica()
+        self.etiqueta_grafica.grid_remove()
+
+        figura = Figure(figsize=(5.2, 3.6), dpi=100)
+        eje = figura.add_subplot(111)
+        limite_x, limite_y = self.metodo_grafico.calcular_limites_grafica(
+            self.problema_actual,
+            self.resultado_actual["vertices"],
+        )
+        valores_x = [limite_x * indice / 300 for indice in range(301)]
+        colores_restricciones = (
+            "#1f77b4",
+            "#ff7f0e",
+            "#9467bd",
+            "#2ca02c",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+        )
+
+        for indice, restriccion in enumerate(
+            self.problema_actual.restricciones, start=1
+        ):
+            a1, a2, _operador, termino_independiente = restriccion
+            color = colores_restricciones[(indice - 1) % len(colores_restricciones)]
+            if abs(a2) > self.metodo_grafico.TOLERANCIA:
+                valores_y = [
+                    (termino_independiente - a1 * x1) / a2 for x1 in valores_x
+                ]
+                eje.plot(
+                    valores_x,
+                    valores_y,
+                    color=color,
+                    linewidth=1.4,
+                    label=f"R{indice}",
+                )
+            elif abs(a1) > self.metodo_grafico.TOLERANCIA:
+                eje.axvline(
+                    termino_independiente / a1,
+                    color=color,
+                    linewidth=1.4,
+                    label=f"R{indice}",
+                )
+
+        vertices = self.resultado_actual["vertices"]
+        if len(vertices) >= 3:
+            vertices_ordenados = self.metodo_grafico.ordenar_vertices(vertices)
+            region_x = [punto[0] for punto in vertices_ordenados]
+            region_y = [punto[1] for punto in vertices_ordenados]
+            eje.fill(
+                region_x,
+                region_y,
+                color="#8bc34a",
+                alpha=0.28,
+                label="Región factible",
+                zorder=1,
+            )
+
+        vertices_x = [punto[0] for punto in vertices]
+        vertices_y = [punto[1] for punto in vertices]
+        eje.scatter(
+            vertices_x,
+            vertices_y,
+            color="#1565c0",
+            s=30,
+            label="Vértices",
+            zorder=3,
+        )
+
+        for indice, (x1, x2) in enumerate(vertices, start=1):
+            eje.annotate(
+                f"V{indice}",
+                (x1, x2),
+                xytext=(4, 5),
+                textcoords="offset points",
+                fontsize=8,
+            )
+
+        x1_optimo, x2_optimo = self.resultado_actual["punto_optimo"]
+        eje.scatter(
+            [x1_optimo],
+            [x2_optimo],
+            color="#d32f2f",
+            edgecolors="white",
+            marker="*",
+            s=180,
+            linewidths=0.7,
+            label="Solución óptima",
+            zorder=4,
+        )
+
+        eje.set_xlim(0, limite_x)
+        eje.set_ylim(0, limite_y)
+        eje.set_xlabel("X1")
+        eje.set_ylabel("X2")
+        eje.set_title(f"Método gráfico - {self.problema_actual.objetivo}")
+        eje.grid(True, alpha=0.25)
+        eje.legend(loc="best", fontsize=7)
+        figura.tight_layout()
+
+        self.figura_grafica = figura
+        self.canvas_grafica = FigureCanvasTkAgg(figura, master=self.marco_grafica)
+        self.canvas_grafica.draw()
+        self.canvas_grafica.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+
+    def _limpiar_grafica(self, mensaje="La gráfica aparecerá al resolver un modelo gráfico."):
+        """Retira la figura anterior y recupera el texto de espera."""
+        if self.canvas_grafica is not None:
+            self.canvas_grafica.get_tk_widget().destroy()
+            self.canvas_grafica = None
+        if self.figura_grafica is not None:
+            self.figura_grafica.clear()
+            self.figura_grafica = None
+
+        self.etiqueta_grafica.configure(text=mensaje)
+        self.etiqueta_grafica.grid()
 
     def _formatear_resultado_grafico(self):
         """Prepara el procedimiento del método gráfico para la interfaz."""
@@ -602,6 +762,7 @@ class AplicacionPL:
 
         self._actualizar_estado_metodo()
         self._mostrar_resultado("")
+        self._limpiar_grafica()
         self.estado_var.set("Formulario limpio.")
 
     def _mostrar_resultado(self, texto):

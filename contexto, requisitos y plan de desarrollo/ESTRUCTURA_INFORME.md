@@ -144,9 +144,13 @@ Procedimiento matemático implementado en el primer incremento de v0.3:
 - evaluación de la función objetivo en los vértices factibles;
 - selección del máximo o mínimo solicitado.
 
-Pendiente para cerrar v0.3:
+Representación visual implementada en el cierre de v0.3:
 
-- elaboración e integración de la gráfica estática con Matplotlib.
+- trazado de las fronteras de cada restricción;
+- sombreado del polígono formado por los vértices factibles;
+- identificación de vértices y solución óptima;
+- límites automáticos, ejes, cuadrícula y leyenda;
+- integración de la figura estática dentro de la interfaz Tkinter.
 
 ### 3.6 Simplex implementado
 
