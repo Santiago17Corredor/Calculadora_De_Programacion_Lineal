@@ -1,7 +1,7 @@
 """Calculadora de programación lineal desarrollada de forma incremental.
 
-Versión v0.4: conserva el método gráfico completo y ejecuta una iteración del
-método Simplex de maximización. El ciclo completo se incorporará después.
+Versión v0.5: integra el método gráfico para maximización y minimización con el
+método Simplex completo para problemas básicos de maximización.
 """
 
 import math
@@ -1061,7 +1061,7 @@ class AplicacionPL:
                 f"X2 = {ProblemaPL.formatear_numero(x2_optimo)}",
                 f"Z  = {ProblemaPL.formatear_numero(valor_optimo)}",
                 "",
-                "La representación gráfica se incorporará en el siguiente incremento.",
+                "La gráfica muestra la región factible, los vértices y el punto óptimo.",
             ]
         )
         return "\n".join(lineas)
