@@ -161,17 +161,17 @@ Crear un programa que abra correctamente y muestre la estructura principal de la
 
 ### Implementar
 
-- imports;
-- ventana principal;
-- título;
-- selector de método;
-- selector max/min;
-- función objetivo;
-- dos restricciones iniciales;
-- botones `+` y `-`;
-- botón `Resolver`;
-- botón `Limpiar`;
-- zona vacía para resultados.
+- [x] imports;
+- [x] ventana principal;
+- [x] título;
+- [x] selector de método;
+- [x] selector max/min;
+- [x] función objetivo;
+- [x] dos restricciones iniciales;
+- [x] botones `+` y `-`;
+- [x] botón `Resolver`;
+- [x] botón `Limpiar`;
+- [x] zona vacía para resultados.
 
 ### Todavía NO implementar
 
@@ -185,12 +185,12 @@ Crear un programa que abra correctamente y muestre la estructura principal de la
 
 Comprobar manualmente:
 
-- abre la ventana;
-- se puede seleccionar método;
-- se pueden escribir coeficientes;
-- `+` agrega una restricción;
-- `-` elimina una restricción;
-- `Limpiar` vacía los campos.
+- [x] abre la ventana;
+- [x] se puede seleccionar método;
+- [x] se pueden escribir coeficientes;
+- [x] `+` agrega una restricción;
+- [x] `-` elimina una restricción;
+- [x] `Limpiar` vacía los campos.
 
 ### Commit sugerido
 
