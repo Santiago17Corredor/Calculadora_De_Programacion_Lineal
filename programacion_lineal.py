@@ -1,7 +1,7 @@
-"""Interfaz y captura del modelo de programación lineal.
+"""Calculadora de programación lineal desarrollada de forma incremental.
 
-Versión v0.2: esta etapa construye y muestra el modelo ingresado. Los métodos
-gráfico y Simplex se incorporarán de forma incremental en versiones posteriores.
+Versión v0.3: resuelve el método gráfico mediante vértices, todavía sin dibujar
+la gráfica. El método Simplex se incorporará en una fase posterior.
 """
 
 import math
@@ -18,7 +18,7 @@ class ProblemaPL:
         self.restricciones = restricciones
 
     @staticmethod
-    def _formatear_numero(valor):
+    def formatear_numero(valor):
         """Muestra enteros sin decimal y conserva los decimales necesarios."""
         if float(valor).is_integer():
             return str(int(valor))
@@ -27,9 +27,9 @@ class ProblemaPL:
     @classmethod
     def _formatear_expresion(cls, coeficiente_x1, coeficiente_x2):
         """Construye una expresión legible con X1 y X2."""
-        primer_termino = f"{cls._formatear_numero(coeficiente_x1)}X1"
+        primer_termino = f"{cls.formatear_numero(coeficiente_x1)}X1"
         signo = "+" if coeficiente_x2 >= 0 else "-"
-        segundo_coeficiente = cls._formatear_numero(abs(coeficiente_x2))
+        segundo_coeficiente = cls.formatear_numero(abs(coeficiente_x2))
         return f"{primer_termino} {signo} {segundo_coeficiente}X2"
 
     def formatear_modelo(self):
@@ -44,11 +44,121 @@ class ProblemaPL:
 
         for a1, a2, operador, termino_independiente in self.restricciones:
             expresion = self._formatear_expresion(a1, a2)
-            valor_b = self._formatear_numero(termino_independiente)
+            valor_b = self.formatear_numero(termino_independiente)
             lineas.append(f"{expresion} {operador} {valor_b}")
 
         lineas.extend(["", "X1, X2 >= 0"])
         return "\n".join(lineas)
+
+
+class MetodoGrafico:
+    """Resuelve problemas de dos variables mediante sus vértices factibles."""
+
+    TOLERANCIA = 1e-7
+
+    def resolver(self, problema):
+        """Calcula vértices, evaluaciones y solución óptima."""
+        candidatos = self.calcular_intersecciones(problema)
+        vertices = self.obtener_vertices_factibles(problema, candidatos)
+
+        if not vertices:
+            raise ValueError(
+                "No se encontraron vértices factibles para el modelo ingresado."
+            )
+
+        evaluaciones = self.evaluar_objetivo(problema, vertices)
+        if problema.objetivo == "Maximizar":
+            punto_optimo, valor_optimo = max(
+                evaluaciones, key=lambda evaluacion: evaluacion[1]
+            )
+        else:
+            punto_optimo, valor_optimo = min(
+                evaluaciones, key=lambda evaluacion: evaluacion[1]
+            )
+
+        return {
+            "candidatos": candidatos,
+            "vertices": vertices,
+            "evaluaciones": evaluaciones,
+            "punto_optimo": punto_optimo,
+            "valor_optimo": valor_optimo,
+        }
+
+    def calcular_intersecciones(self, problema):
+        """Genera intersecciones entre fronteras y con ambos ejes."""
+        candidatos = [(0.0, 0.0)]
+
+        for a1, a2, _operador, termino_independiente in problema.restricciones:
+            if abs(a1) > self.TOLERANCIA:
+                candidatos.append((termino_independiente / a1, 0.0))
+            if abs(a2) > self.TOLERANCIA:
+                candidatos.append((0.0, termino_independiente / a2))
+
+        for indice, primera in enumerate(problema.restricciones):
+            for segunda in problema.restricciones[indice + 1 :]:
+                interseccion = self._interseccion_dos_rectas(primera, segunda)
+                if interseccion is not None:
+                    candidatos.append(interseccion)
+
+        return candidatos
+
+    def _interseccion_dos_rectas(self, primera, segunda):
+        """Resuelve un sistema de dos fronteras mediante determinantes."""
+        a1, a2, _operador_1, b1 = primera
+        c1, c2, _operador_2, b2 = segunda
+        determinante = a1 * c2 - a2 * c1
+
+        if abs(determinante) <= self.TOLERANCIA:
+            return None
+
+        x1 = (b1 * c2 - a2 * b2) / determinante
+        x2 = (a1 * b2 - b1 * c1) / determinante
+        return x1, x2
+
+    def obtener_vertices_factibles(self, problema, candidatos):
+        """Conserva puntos que cumplen restricciones y no negatividad."""
+        vertices = []
+
+        for x1, x2 in candidatos:
+            punto = (
+                0.0 if abs(x1) <= self.TOLERANCIA else x1,
+                0.0 if abs(x2) <= self.TOLERANCIA else x2,
+            )
+            if not self._es_factible(problema, punto):
+                continue
+            if self._punto_repetido(punto, vertices):
+                continue
+            vertices.append(punto)
+
+        return sorted(vertices, key=lambda punto: (punto[0], punto[1]))
+
+    def _es_factible(self, problema, punto):
+        """Comprueba todas las desigualdades para un punto candidato."""
+        x1, x2 = punto
+        if x1 < -self.TOLERANCIA or x2 < -self.TOLERANCIA:
+            return False
+
+        for a1, a2, operador, termino_independiente in problema.restricciones:
+            lado_izquierdo = a1 * x1 + a2 * x2
+            if operador == "<=" and lado_izquierdo > termino_independiente + self.TOLERANCIA:
+                return False
+            if operador == ">=" and lado_izquierdo < termino_independiente - self.TOLERANCIA:
+                return False
+        return True
+
+    def _punto_repetido(self, punto, vertices):
+        """Evita mostrar varias veces una misma intersección."""
+        return any(
+            abs(punto[0] - existente[0]) <= self.TOLERANCIA
+            and abs(punto[1] - existente[1]) <= self.TOLERANCIA
+            for existente in vertices
+        )
+
+    @staticmethod
+    def evaluar_objetivo(problema, vertices):
+        """Evalúa la función objetivo en cada vértice factible."""
+        c1, c2 = problema.coeficientes_objetivo
+        return [(punto, c1 * punto[0] + c2 * punto[1]) for punto in vertices]
 
 
 class AplicacionPL:
@@ -60,7 +170,9 @@ class AplicacionPL:
     def __init__(self, ventana):
         self.ventana = ventana
         self.filas_restricciones = []
+        self.metodo_grafico = MetodoGrafico()
         self.problema_actual = None
+        self.resultado_actual = None
 
         self.metodo_var = tk.StringVar(value=self.METODO_GRAFICO)
         self.objetivo_var = tk.StringVar(value="Maximizar")
@@ -381,30 +493,97 @@ class AplicacionPL:
         )
 
     def resolver(self):
-        """Lee y muestra el modelo; todavía no ejecuta algoritmos."""
+        """Lee el modelo y ejecuta el método disponible en esta versión."""
         try:
             self.problema_actual = self.leer_problema()
         except ValueError as error:
             self.problema_actual = None
+            self.resultado_actual = None
             self._mostrar_resultado(f"No se pudo construir el modelo.\n\n{error}")
             self.estado_var.set("Revise los datos indicados en el panel de resultados.")
             return
 
         metodo = self.metodo_var.get()
-        texto = (
-            f"Método seleccionado: {metodo}\n\n"
-            "Modelo ingresado\n"
-            "----------------\n"
-            f"{self.problema_actual.formatear_modelo()}\n\n"
-            "El modelo fue leído correctamente. La solución se implementará "
-            "en las siguientes fases."
-        )
+        if metodo == self.METODO_GRAFICO:
+            try:
+                self.resultado_actual = self.metodo_grafico.resolver(
+                    self.problema_actual
+                )
+            except ValueError as error:
+                self.resultado_actual = None
+                self._mostrar_resultado(
+                    f"Modelo ingresado\n----------------\n"
+                    f"{self.problema_actual.formatear_modelo()}\n\n{error}"
+                )
+                self.estado_var.set("No fue posible resolver el modelo ingresado.")
+                return
+
+            texto = self._formatear_resultado_grafico()
+            self.estado_var.set("Método gráfico resuelto mediante vértices.")
+        else:
+            self.resultado_actual = None
+            texto = (
+                f"Método seleccionado: {metodo}\n\n"
+                "Modelo ingresado\n"
+                "----------------\n"
+                f"{self.problema_actual.formatear_modelo()}\n\n"
+                "El modelo fue leído correctamente. Simplex se implementará "
+                "en la versión v0.4."
+            )
+            self.estado_var.set("Modelo Simplex leído; el algoritmo aún no está implementado.")
+
         self._mostrar_resultado(texto)
-        self.estado_var.set("Modelo leído y mostrado correctamente.")
+
+    def _formatear_resultado_grafico(self):
+        """Prepara el procedimiento del método gráfico para la interfaz."""
+        lineas = [
+            "Método seleccionado: Método gráfico",
+            "",
+            "Modelo ingresado",
+            "----------------",
+            self.problema_actual.formatear_modelo(),
+            "",
+            "Vértices factibles:",
+        ]
+
+        for indice, vertice in enumerate(self.resultado_actual["vertices"], start=1):
+            x1, x2 = vertice
+            punto = self._formatear_punto(x1, x2)
+            lineas.append(f"V{indice} = {punto}")
+
+        lineas.extend(["", "Evaluación de la función objetivo:"])
+        for indice, (_vertice, valor_z) in enumerate(
+            self.resultado_actual["evaluaciones"], start=1
+        ):
+            valor = ProblemaPL.formatear_numero(valor_z)
+            lineas.append(f"Z(V{indice}) = {valor}")
+
+        x1_optimo, x2_optimo = self.resultado_actual["punto_optimo"]
+        valor_optimo = self.resultado_actual["valor_optimo"]
+        lineas.extend(
+            [
+                "",
+                "Solución óptima:",
+                f"X1 = {ProblemaPL.formatear_numero(x1_optimo)}",
+                f"X2 = {ProblemaPL.formatear_numero(x2_optimo)}",
+                f"Z  = {ProblemaPL.formatear_numero(valor_optimo)}",
+                "",
+                "La representación gráfica se incorporará en el siguiente incremento.",
+            ]
+        )
+        return "\n".join(lineas)
+
+    @staticmethod
+    def _formatear_punto(x1, x2):
+        """Convierte un par de coordenadas en texto legible."""
+        valor_x1 = ProblemaPL.formatear_numero(x1)
+        valor_x2 = ProblemaPL.formatear_numero(x2)
+        return f"({valor_x1}, {valor_x2})"
 
     def limpiar(self):
         """Restablece el formulario a su estado inicial."""
         self.problema_actual = None
+        self.resultado_actual = None
         self.metodo_var.set(self.METODO_GRAFICO)
         self.objetivo_var.set("Maximizar")
         self.coeficiente_x1_var.set("")

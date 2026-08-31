@@ -135,13 +135,18 @@ Describir cada version despues de verificarla:
 
 ### 3.5 Metodo grafico implementado
 
-Completar cuando termine v0.3:
+Procedimiento matemático implementado en el primer incremento de v0.3:
 
-- generacion de candidatos;
-- comprobacion de restricciones;
-- evaluacion de vertices;
-- seleccion del optimo;
-- elaboracion de la grafica.
+- generación de candidatos mediante intersecciones entre restricciones y ejes;
+- solución de sistemas de dos ecuaciones mediante determinantes;
+- comprobación de restricciones y condiciones de no negatividad;
+- eliminación de puntos repetidos por tolerancia numérica;
+- evaluación de la función objetivo en los vértices factibles;
+- selección del máximo o mínimo solicitado.
+
+Pendiente para cerrar v0.3:
+
+- elaboración e integración de la gráfica estática con Matplotlib.
 
 ### 3.6 Simplex implementado
 

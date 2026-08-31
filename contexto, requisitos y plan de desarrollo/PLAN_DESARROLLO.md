@@ -247,19 +247,19 @@ Resolver matemáticamente el problema antes de dibujarlo.
 
 ### Implementar paso a paso
 
-1. Representar cada frontera como una ecuación.
-2. Calcular intersecciones:
+1. [x] Representar cada frontera como una ecuación.
+2. [x] Calcular intersecciones:
    - restricción con restricción;
    - restricción con eje X1;
    - restricción con eje X2;
    - incluir `(0,0)` como candidato cuando corresponda.
-3. Guardar puntos candidatos.
-4. Eliminar duplicados básicos.
-5. Comprobar qué puntos satisfacen todas las restricciones.
-6. Obtener vértices factibles.
-7. Evaluar:
+3. [x] Guardar puntos candidatos.
+4. [x] Eliminar duplicados básicos.
+5. [x] Comprobar qué puntos satisfacen todas las restricciones.
+6. [x] Obtener vértices factibles.
+7. [x] Evaluar:
    `Z = c1*X1 + c2*X2`
-8. Elegir máximo o mínimo.
+8. [x] Elegir máximo o mínimo.
 
 ### Herramienta auxiliar
 
@@ -286,7 +286,7 @@ Z = ...
 
 ### Prueba
 
-Comparar los resultados con ejercicios resueltos manualmente.
+- [x] Comparar los resultados con ejercicios resueltos manualmente.
 
 ### Importante
 
@@ -726,15 +726,15 @@ Objetivo del día:
 
 ## Método gráfico
 
-- [ ] Maximiza.
-- [ ] Minimiza.
-- [ ] Varias restricciones.
-- [ ] `<=`.
-- [ ] `>=`.
-- [ ] No negatividad.
-- [ ] Vértices.
-- [ ] Evaluación de Z.
-- [ ] Óptimo.
+- [x] Maximiza.
+- [x] Minimiza.
+- [x] Varias restricciones.
+- [x] `<=`.
+- [x] `>=`.
+- [x] No negatividad.
+- [x] Vértices.
+- [x] Evaluación de Z.
+- [x] Óptimo.
 - [ ] Gráfica.
 
 ## Simplex

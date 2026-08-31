@@ -10,12 +10,13 @@ La primera entrega contempla:
 - interfaz gráfica con Tkinter;
 - visualización del procedimiento y los resultados.
 
-El proyecto se desarrolla de forma incremental. La versión actual es `v0.2`,
-correspondiente a la interfaz gráfica básica y la captura del modelo matemático.
+El proyecto se desarrolla de forma incremental. La versión actual es `v0.3`,
+correspondiente al método gráfico resuelto mediante vértices, todavía sin la
+representación con Matplotlib.
 
-En esta versión, el botón `Resolver` valida las entradas y muestra el modelo
-interpretado por la aplicación. Los algoritmos de solución todavía no están
-implementados.
+En esta versión, el botón `Resolver` valida las entradas, muestra el modelo,
+calcula los vértices factibles y selecciona el máximo o mínimo. El método Simplex
+todavía no está implementado.
 
 ## Ejecución
 
