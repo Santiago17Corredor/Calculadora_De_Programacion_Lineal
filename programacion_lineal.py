@@ -410,6 +410,8 @@ class AplicacionPL:
         self.agregar_restriccion()
         self.agregar_restriccion()
         self._actualizar_estado_metodo()
+        self.coeficiente_x1_var.trace_add("write", self._al_modificar_datos)
+        self.coeficiente_x2_var.trace_add("write", self._al_modificar_datos)
 
     def _configurar_ventana(self):
         """Define el título y el tamaño inicial de la ventana."""
@@ -492,6 +494,7 @@ class AplicacionPL:
             width=14,
         )
         self.objetivo_combo.grid(row=0, column=3, sticky="ew")
+        self.objetivo_combo.bind("<<ComboboxSelected>>", self._al_modificar_datos)
 
         funcion = ttk.LabelFrame(panel, text="Función objetivo", padding=12)
         funcion.grid(row=1, column=0, sticky="ew", pady=(0, 12))
@@ -622,9 +625,14 @@ class AplicacionPL:
             width=5,
         )
         operador_combo.grid(row=0, column=5, padx=4)
+        operador_combo.bind("<<ComboboxSelected>>", self._al_modificar_datos)
         ttk.Entry(fila, textvariable=termino_independiente, width=9).grid(
             row=0, column=6
         )
+
+        coeficiente_x1.trace_add("write", self._al_modificar_datos)
+        coeficiente_x2.trace_add("write", self._al_modificar_datos)
+        termino_independiente.trace_add("write", self._al_modificar_datos)
 
         self.filas_restricciones.append(
             {
@@ -638,6 +646,7 @@ class AplicacionPL:
             }
         )
         self._actualizar_operadores()
+        self._descartar_resultado_actual()
         self.estado_var.set(f"Restricciones actuales: {len(self.filas_restricciones)}.")
 
     def eliminar_restriccion(self):
@@ -647,6 +656,7 @@ class AplicacionPL:
             return
 
         self._eliminar_ultima_restriccion()
+        self._descartar_resultado_actual()
         self.estado_var.set(f"Restricciones actuales: {len(self.filas_restricciones)}.")
 
     def _eliminar_ultima_restriccion(self):
@@ -656,6 +666,7 @@ class AplicacionPL:
 
     def _actualizar_estado_metodo(self, _evento=None):
         """Ajusta objetivo y operadores al método seleccionado."""
+        self._descartar_resultado_actual()
         if self.metodo_var.get() == self.METODO_SIMPLEX:
             self.objetivo_var.set("Maximizar")
             self.objetivo_combo.configure(state="disabled")
@@ -667,6 +678,22 @@ class AplicacionPL:
             self._limpiar_grafica()
 
         self._actualizar_operadores()
+
+    def _al_modificar_datos(self, *_args):
+        """Descarta una solución que ya no corresponde con el formulario."""
+        if not hasattr(self, "texto_resultados"):
+            return
+        self._descartar_resultado_actual()
+        self.estado_var.set("Datos modificados. Pulse Resolver para actualizar el resultado.")
+
+    def _descartar_resultado_actual(self):
+        """Limpia resultados y gráfica sin modificar los campos de entrada."""
+        if not hasattr(self, "texto_resultados"):
+            return
+        self.problema_actual = None
+        self.resultado_actual = None
+        self._mostrar_resultado("")
+        self._limpiar_grafica()
 
     def _actualizar_operadores(self):
         """Habilita o bloquea los operadores según el método."""

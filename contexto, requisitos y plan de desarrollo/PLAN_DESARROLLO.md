@@ -502,14 +502,14 @@ Unir ambos métodos sin agregar funciones nuevas.
 
 ### Comprobar
 
-- selector de método;
-- selector objetivo;
-- entradas;
-- restricciones dinámicas;
-- resultados;
-- gráfica;
-- tablas Simplex;
-- botón limpiar.
+- [x] selector de método;
+- [x] selector objetivo;
+- [x] entradas;
+- [x] restricciones dinámicas;
+- [x] resultados;
+- [x] gráfica;
+- [x] tablas Simplex;
+- [x] botón limpiar.
 
 ### Comportamiento importante
 
@@ -524,6 +524,10 @@ entonces:
 para v1.0.
 
 Puede deshabilitarse temporalmente la opción minimizar.
+
+- [x] Al seleccionar Simplex, el objetivo queda en maximizar y los operadores en
+  `<=`.
+- [x] Al modificar el formulario, se descartan resultados anteriores.
 
 ### Commit sugerido
 
